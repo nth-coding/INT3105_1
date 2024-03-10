@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BFF Demo</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <button id="fetchDataBFF">Fetch Data with BFF</button>
+  <button id="fetchDataAPIGateway">Fetch Data with API Gateway</button>
+  <button id="fetchDataGraphQL">Fetch Data with GraphQL</button>
+  <div id="result"></div>
+
+  <script>
+    document.getElementById('fetchDataBFF').addEventListener('click', fetchData('http://localhost:3000/custom-data/1', 'BFF'));
+    document.getElementById('fetchDataAPIGateway').addEventListener('click', fetchData('http://localhost:4000/product/1', 'API Gateway'));
+    document.getElementById('fetchDataGraphQL').addEventListener('click', fetchDataGraphQL());
+
+    async function fetchData(url, name) {
+      const resultDiv = document.getElementById('result');
+      try {
+        const startTime = performance.now();
+        const response = await fetch(url);
+        const endTime = performance.now();
+        const time = endTime - startTime;
+        const dataSize = response.headers.get('Content-Length');
+        const data = await response.json();
+        resultDiv.textContent = `Data from ${name}: ${JSON.stringify(data, null, 2)}\nSize: ${dataSize} bytes\nTime: ${time.toFixed(2)} ms`;
+      } catch (error) {
+        resultDiv.textContent = 'An error occurred';
+      }
+    }
+
+    async function fetchDataGraphQL() {
+      const resultDiv = document.getElementById('result');
+      try {
+        const query = `{ getProduct(id: 1) { name price } }`;
+        const startTime = performance.now();
+        const response = await fetch('http://localhost:5000/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query }),
+        });
+        const endTime = performance.now();
+        const time = endTime - startTime;
+        const dataSize = response.headers.get('Content-Length');
+        const { data } = await response.json();
+        resultDiv.textContent = `Data from GraphQL: ${JSON.stringify(data.getProduct, null, 2)}\nSize: ${dataSize} bytes\nTime: ${time.toFixed(2)} ms`;
+      } catch (error) {
+        resultDiv.textContent = 'An error occurred';
+      }
+    }
+  </script>
+</body>
+</html>
