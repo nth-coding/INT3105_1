@@ -1,54 +1,165 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>BFF Demo</title>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon">
-</head>
-<body>
-  <button id="fetchDataBFF">Fetch Data with BFF</button>
-  <button id="fetchDataAPIGateway">Fetch Data with API Gateway</button>
-  <button id="fetchDataGraphQL">Fetch Data with GraphQL</button>
-  <div id="result"></div>
-
-  <script>
-    document.getElementById('fetchDataBFF').addEventListener('click', fetchData('http://localhost:3000/custom-data/1', 'BFF'));
-    document.getElementById('fetchDataAPIGateway').addEventListener('click', fetchData('http://localhost:4000/product/1', 'API Gateway'));
-    document.getElementById('fetchDataGraphQL').addEventListener('click', fetchDataGraphQL());
-
-    async function fetchData(url, name) {
-      const resultDiv = document.getElementById('result');
-      try {
-        const startTime = performance.now();
-        const response = await fetch(url);
-        const endTime = performance.now();
-        const time = endTime - startTime;
-        const dataSize = response.headers.get('Content-Length');
-        const data = await response.json();
-        resultDiv.textContent = `Data from ${name}: ${JSON.stringify(data, null, 2)}\nSize: ${dataSize} bytes\nTime: ${time.toFixed(2)} ms`;
-      } catch (error) {
-        resultDiv.textContent = 'An error occurred';
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
       }
-    }
-
-    async function fetchDataGraphQL() {
-      const resultDiv = document.getElementById('result');
-      try {
-        const query = `{ getProduct(id: 1) { name price } }`;
-        const startTime = performance.now();
-        const response = await fetch('http://localhost:5000/graphql', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query }),
-        });
-        const endTime = performance.now();
-        const time = endTime - startTime;
-        const dataSize = response.headers.get('Content-Length');
-        const { data } = await response.json();
-        resultDiv.textContent = `Data from GraphQL: ${JSON.stringify(data.getProduct, null, 2)}\nSize: ${dataSize} bytes\nTime: ${time.toFixed(2)} ms`;
-      } catch (error) {
-        resultDiv.textContent = 'An error occurred';
+  
+      .container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        width: 80%; /* Ajust the width as needed */
       }
-    }
-  </script>
-</body>
+  
+      button {
+        margin: 10px;
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+  
+      .result-container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        max-width: 300px; /* Adjust the max-width as needed */
+        max-height: 300px;
+        overflow: auto;
+      }
+  
+      .json-response {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div>
+        <button id="fetchDataBFF">Fetch Data with BFF</button>
+        <div id="resultBFF" class="result-container json-response"></div>
+        
+        <div id="sizeInfoBFF"></div>
+        <div id="timeInfoBFF"></div>
+      </div>
+  
+      <div>
+        <button id="fetchDataAPIGateway">Fetch Data with API Gateway</button>
+        <div id="resultAPIGateway" class="result-container json-response"></div>
+        
+        <div id="sizeInfoAPIGateway"></div>
+        <div id="timeInfoAPIGateway"></div>
+      </div>
+  
+      <div>
+        <button id="fetchDataGraphQL">Fetch Data with GraphQL</button>
+        <div id="resultGraphQL" class="result-container json-response"></div>
+
+        <div id="sizeInfoGraphQL"></div>
+        <div id="timeInfoGraphQL"></div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("fetchDataBFF")
+        .addEventListener("click", () =>
+          fetchData("http://localhost:3000/users-and-products/1", "resultBFF", "sizeInfoBFF", "timeInfoBFF")
+        );
+      document
+        .getElementById("fetchDataAPIGateway")
+        .addEventListener("click", fetchDataAPIGateway);
+      document
+        .getElementById("fetchDataGraphQL")
+        .addEventListener("click", fetchDataGraphQL);
+
+      async function fetchData(url, resultId, sizeInfoId, timeInfoId) {
+        const resultDiv = document.getElementById(resultId);
+        const sizeInfo = document.getElementById(sizeInfoId);
+        const timeInfo = document.getElementById(timeInfoId);
+
+        try {
+          const startTime = performance.now();
+          const response = await fetch(url);
+          const endTime = performance.now();
+          const time = endTime - startTime;
+
+          const dataSize = parseInt(response.headers.get('Content-Length'), 10) || 0;
+          const data = await response.json();
+
+          resultDiv.textContent = `Data: ${JSON.stringify(data, null, 2)}`;
+          sizeInfo.textContent = `Size: ${dataSize} bytes`;
+          timeInfo.textContent = `Time: ${time.toFixed(2)} ms`;
+        } catch (error) {
+          resultDiv.textContent = 'An error occurred';
+        }
+      }
+
+      async function fetchDataAPIGateway() {
+        const resultDiv = document.getElementById('resultAPIGateway');
+        const sizeInfo = document.getElementById('sizeInfoAPIGateway');
+        const timeInfo = document.getElementById('timeInfoAPIGateway');
+
+        try {
+          const startTime = performance.now();
+          const responseUsers = await fetch('http://localhost:4000/users/1');
+          const responseProducts = await fetch('http://localhost:4000/products/1');
+          const endTime = performance.now();
+          const time = endTime - startTime;
+
+          const dataSizeUsers = parseInt(responseUsers.headers.get('Content-Length'), 10) || 0;
+          const dataSizeProducts = parseInt(responseProducts.headers.get('Content-Length'), 10) || 0;
+
+          const dataUsers = await responseUsers.json();
+          const dataProducts = await responseProducts.json();
+
+          const sumSize = dataSizeUsers + dataSizeProducts;
+
+          resultDiv.textContent = `Users: ${JSON.stringify(dataUsers, null, 2)}\nProducts: ${JSON.stringify(dataProducts, null, 2)}`;
+          
+          sizeInfo.textContent = `Size: ${sumSize} bytes`;
+          timeInfo.textContent = `Time: ${time.toFixed(2)} ms`;
+        } catch (error) {
+          resultDiv.textContent = 'An error occurred';
+        }
+      }
+
+      async function fetchDataGraphQL() {
+        const resultDiv = document.getElementById('resultGraphQL');
+        const sizeInfo = document.getElementById('sizeInfoGraphQL');
+        const timeInfo = document.getElementById('timeInfoGraphQL');
+
+        try {
+          const query = `{ getProduct(id: 1) { name price } getUser(id: 1) { name email } }`;
+          const startTime = performance.now();
+          const response = await fetch('http://localhost:5000/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query }),
+          });
+          const endTime = performance.now();
+          const time = endTime - startTime;
+
+          const dataSize = parseInt(response.headers.get('Content-Length'), 10) || 0;
+          const { data } = await response.json();
+
+          resultDiv.textContent = `Data from GraphQL: ${JSON.stringify(data, null, 2)}`;
+          sizeInfo.textContent = `Size: ${dataSize} bytes`;
+          timeInfo.textContent = `Time: ${time.toFixed(2)} ms`;
+        } catch (error) {
+          resultDiv.textContent = 'An error occurred';
+        }
+      }
+    </script>
+  </body>
 </html>

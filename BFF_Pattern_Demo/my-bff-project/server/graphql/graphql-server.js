@@ -3,22 +3,36 @@ const { graphqlHTTP } = require('express-graphql');
 const { buildSchema } = require('graphql');
 const axios = require('axios');
 const cors = require('cors');
+const DataService = require('./data-service');
 
 const schema = buildSchema(`
   type Product {
     name: String
-    price: String
+    price: Float
+  }
+
+  type User {
+    name: String
+    email: String
   }
 
   type Query {
     getProduct(id: Int!): Product
+    getUser(id: Int!): User
   }
 `);
 
+const productService = new DataService('http://localhost:3001/products');
+const userService = new DataService('http://localhost:3002/users');
+
 const root = {
   getProduct: async ({ id }) => {
-    const response = await axios.get(`http://localhost:3001/products/${id}`);
-    return { name: response.data.name, price: response.data.price };
+    const data = await productService.getData(id);
+    return { name: data.name, price: data.price };
+  },
+  getUser: async ({ id }) => {
+    const data = await userService.getData(id);
+    return { name: data.name, email: data.email };
   },
 };
 

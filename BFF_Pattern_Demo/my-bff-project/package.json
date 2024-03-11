@@ -4,15 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "concurrently \"npm run dev:graphql\" \"npm run dev:product\" \"npm run dev:user\" \"npm run dev:api-gateway\" \"npm run dev:bff\"",
+    "dev:graphql": "nodemon server/graphql/graphql-server.js",
+    "dev:product": "nodemon server/product-service/product-service.js",
+    "dev:user": "nodemon server/user-service/user-service.js",
+    "dev:api-gateway": "nodemon server/api-gateway/api-gateway-server.js",
+    "dev:bff": "nodemon server/bff/bff-server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.6.7",
+    "axios": "^0.21.1",
     "cors": "^2.8.5",
-    "express": "^4.18.3",
-    "express-graphql": "^0.12.0"
+    "express": "^4.17.1",
+    "express-graphql": "^0.12.0",
+    "graphql": "^15.5.0"
+  },
+  "devDependencies": {
+    "concurrently": "^6.2.0",
+    "nodemon": "^2.0.7"
   }
 }

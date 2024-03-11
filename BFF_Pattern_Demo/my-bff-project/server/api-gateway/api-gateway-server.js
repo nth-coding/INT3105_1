@@ -6,20 +6,36 @@ const port = 4000;
 
 app.use(cors());
 
-app.get('/product/:id', async (req, res) => {
+app.get('/products', async (req, res) => {
   try {
-    const id = req.params.id;
-    const productData = await axios.get(`http://localhost:3001/products/${id}`);
+    const productData = await axios.get('http://localhost:3001/products');
     res.send(productData.data);
   } catch (error) {
     res.status(500).send({ error: 'An error occurred' });
   }
 });
 
-app.get('/user/:id', async (req, res) => {
+app.get('/users', async (req, res) => {
   try {
-    const id = req.params.id;
-    const userData = await axios.get(`http://localhost:3002/users/${id}`);
+    const userData = await axios.get('http://localhost:3002/users');
+    res.send(userData.data);
+  } catch (error) {
+    res.status(500).send({ error: 'An error occurred' });
+  }
+});
+
+app.get('/products/:id', async (req, res) => {
+  try {
+    const productData = await axios.get(`http://localhost:3001/products/${req.params.id}`);
+    res.send(productData.data);
+  } catch (error) {
+    res.status(500).send({ error: 'An error occurred' });
+  }
+});
+
+app.get('/users/:id', async (req, res) => {
+  try {
+    const userData = await axios.get(`http://localhost:3002/users/${req.params.id}`);
     res.send(userData.data);
   } catch (error) {
     res.status(500).send({ error: 'An error occurred' });
