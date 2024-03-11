@@ -1,4 +1,4 @@
-# How to Run a Node.js Project
+# How to Run Project
 
 Follow these steps to run your Node.js project:
 
