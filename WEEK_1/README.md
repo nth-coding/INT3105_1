@@ -1,4 +1,6 @@
-# WEEK_1
+# WEEK_1 
+
+Nguyễn Tiến Hải - 21020066
 
 ## 1. `Docker`, `docker-compose` là gì?
 
